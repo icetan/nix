@@ -696,8 +696,11 @@ struct curlFileTransfer : public FileTransfer
                 std::string region = getOr(params, "region", Aws::Region::US_EAST_1);
                 std::string scheme = getOr(params, "scheme", "");
                 std::string endpoint = getOr(params, "endpoint", "");
+                std::string dualstack_str = getOr(params, "dualstack", "true");
+                bool dualstack;
+                std::istringstream(dualstack_str) >> std::boolalpha >> dualstack;
 
-                S3Helper s3Helper(profile, region, scheme, endpoint);
+                S3Helper s3Helper(profile, region, scheme, endpoint, dualstack);
 
                 // FIXME: implement ETag
                 auto s3Res = s3Helper.getObject(bucketName, key);

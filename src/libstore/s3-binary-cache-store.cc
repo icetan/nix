@@ -91,8 +91,9 @@ S3Helper::S3Helper(
     const std::string & profile,
     const std::string & region,
     const std::string & scheme,
-    const std::string & endpoint)
-    : config(makeConfig(region, scheme, endpoint))
+    const std::string & endpoint,
+    const bool dualstack)
+    : config(makeConfig(region, scheme, endpoint, dualstack))
     , client(make_ref<Aws::S3::S3Client>(
             profile == ""
             ? std::dynamic_pointer_cast<Aws::Auth::AWSCredentialsProvider>(
@@ -128,7 +129,8 @@ class RetryStrategy : public Aws::Client::DefaultRetryStrategy
 ref<Aws::Client::ClientConfiguration> S3Helper::makeConfig(
     const std::string & region,
     const std::string & scheme,
-    const std::string & endpoint)
+    const std::string & endpoint,
+    const bool dualstack)
 {
     initAWS();
     auto res = make_ref<Aws::Client::ClientConfiguration>();
@@ -143,6 +145,9 @@ ref<Aws::Client::ClientConfiguration> S3Helper::makeConfig(
     res->connectTimeoutMs = 5 * 1000;
     res->retryStrategy = std::make_shared<RetryStrategy>();
     res->caFile = settings.caFile;
+    if (!dualstack) {
+        res->useDualStack = false;
+    }
     return res;
 }
 
@@ -196,6 +201,7 @@ struct S3BinaryCacheStoreConfig : virtual BinaryCacheStoreConfig
     const Setting<std::string> region{(StoreConfig*) this, Aws::Region::US_EAST_1, "region", {"aws-region"}};
     const Setting<std::string> scheme{(StoreConfig*) this, "", "scheme", "The scheme to use for S3 requests, https by default."};
     const Setting<std::string> endpoint{(StoreConfig*) this, "", "endpoint", "An optional override of the endpoint to use when talking to S3."};
+    const Setting<bool> dualstack{(StoreConfig*) this, true, "dualstack", "whether to enable IPv6 support."};
     const Setting<std::string> narinfoCompression{(StoreConfig*) this, "", "narinfo-compression", "compression method for .narinfo files"};
     const Setting<std::string> lsCompression{(StoreConfig*) this, "", "ls-compression", "compression method for .ls files"};
     const Setting<std::string> logCompression{(StoreConfig*) this, "", "log-compression", "compression method for log/* files"};
@@ -226,7 +232,7 @@ struct S3BinaryCacheStoreImpl : virtual S3BinaryCacheStoreConfig, public virtual
         , BinaryCacheStore(params)
         , S3BinaryCacheStore(params)
         , bucketName(bucketName)
-        , s3Helper(profile, region, scheme, endpoint)
+        , s3Helper(profile, region, scheme, endpoint, dualstack)
     {
         diskCache = getNarInfoDiskCache();
     }
