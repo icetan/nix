@@ -178,7 +178,14 @@ static Flake readFlake(
     const InputPath & lockRootPath)
 {
     CanonPath flakeDir(resolvedRef.subdir);
+
+    auto devEnvPath = rootDir / flakeDir / ".devenv.flake.nix";
     auto flakePath = rootDir / flakeDir / "flake.nix";
+    if (devEnvPath.pathExists()) {
+      flakePath = devEnvPath;
+    } else if (!flakePath.pathExists()) {
+      throw Error("flake '%s' does not exist", devEnvPath);
+    }
 
     Value vInfo;
     state.evalFile(flakePath, vInfo, true);
@@ -341,7 +348,7 @@ LockedFlake lockFlake(
 
         auto oldLockFile = readLockFile(
             lockFlags.referenceLockFilePath.value_or(
-                flake->lockFilePath()));
+                flake->path.parent() + "devenv.lock"));
 
         debug("old lock file: %s", oldLockFile);
 
