@@ -45,7 +45,7 @@
 # work. The top-level flake.nix will choose useful combinations of these
 # options to CI.
 
-, pname ? "nix"
+, pname ? "nix-devenv"
 
 , versionSuffix ? ""
 , officialRelease ? false
