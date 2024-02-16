@@ -4,9 +4,8 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05-small";
   inputs.nixpkgs-regression.url = "github:NixOS/nixpkgs/215d4d0fd80ca5163643b03a33fde804a29cc1e2";
   inputs.flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
-  inputs.libgit2 = { url = "github:libgit2/libgit2"; flake = false; };
 
-  outputs = { self, nixpkgs, nixpkgs-regression, libgit2, ... }:
+  outputs = { self, nixpkgs, nixpkgs-regression, ... }:
 
     let
       inherit (nixpkgs) lib;
@@ -153,8 +152,6 @@
           };
 
           libgit2-nix = final.libgit2.overrideAttrs (attrs: {
-            src = libgit2;
-            version = libgit2.lastModifiedDate;
             cmakeFlags = attrs.cmakeFlags or []
               ++ [ "-DUSE_SSH=exec" ];
           });
