@@ -303,16 +303,17 @@ struct GitRepoImpl : GitRepo, std::enable_shared_from_this<GitRepoImpl>
             info.submodules = parseSubmodules(modulesFile);
 
         // Usually ignored, so add it manually
-        if (pathExists(CanonPath::fromCwd(".devenv.flake.nix").abs())) {
-            info.files.insert(CanonPath::fromCwd(".devenv.flake.nix").removePrefix(path).rel());
-            info.files.insert(CanonPath::fromCwd(".devenv/flake.json").removePrefix(path).rel());
-            info.files.insert(CanonPath::fromCwd(".devenv/devenv.json").removePrefix(path).rel());
+        if (pathExists(path / ".devenv.flake.nix")) {
+            info.files.insert(CanonPath(".devenv.flake.nix"));
+            info.files.insert(CanonPath(".devenv/flake.json"));
+            info.files.insert(CanonPath(".devenv/devenv.json"));
         }
-        if (pathExists(CanonPath::fromCwd("devenv.local.nix").abs())) {
-            info.files.insert(CanonPath::fromCwd("devenv.local.nix").removePrefix(path).rel());
+        if (pathExists(path / "devenv.local.nix")) {
+            info.files.insert(CanonPath("devenv.local.nix"));
         }
-        if (pathExists(CanonPath::fromCwd(".env").abs())) {
-            info.files.insert(CanonPath::fromCwd(".env").removePrefix(path).rel());
+        // begins with .env
+        if (pathExists(path / ".env")) {
+            info.files.insert(CanonPath(".env"));
         }
 
         return info;

@@ -348,7 +348,7 @@ LockedFlake lockFlake(
 
         auto oldLockFile = readLockFile(
             lockFlags.referenceLockFilePath.value_or(
-                flake->path.parent() + "devenv.lock"));
+                flake->path.parent() / "devenv.lock"));
 
         debug("old lock file: %s", oldLockFile);
 
