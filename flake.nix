@@ -158,13 +158,6 @@
 
           boehmgc-nix = (final.boehmgc.override {
             enableLargeConfig = true;
-          }).overrideAttrs(o: {
-            patches = (o.patches or []) ++ [
-              ./dep-patches/boehmgc-coroutine-sp-fallback.diff
-
-              # https://github.com/ivmai/bdwgc/pull/586
-              ./dep-patches/boehmgc-traceable_allocator-public.diff
-            ];
           });
 
           changelog-d-nix = final.buildPackages.callPackage ./misc/changelog-d.nix { };
