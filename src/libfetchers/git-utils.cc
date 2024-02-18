@@ -30,6 +30,8 @@
 #include <regex>
 #include <span>
 
+namespace fs = std::filesystem;
+
 namespace std {
 
 template<> struct hash<git_oid>
@@ -302,18 +304,20 @@ struct GitRepoImpl : GitRepo, std::enable_shared_from_this<GitRepoImpl>
         if (pathExists(modulesFile))
             info.submodules = parseSubmodules(modulesFile);
 
+        fs::path cwd = fs::current_path();
+
         // Usually ignored, so add it manually
-        if (pathExists(path / ".devenv.flake.nix")) {
-            info.files.insert(CanonPath(".devenv.flake.nix"));
-            info.files.insert(CanonPath(".devenv/flake.json"));
-            info.files.insert(CanonPath(".devenv/devenv.json"));
+        if (pathExists(cwd / ".devenv.flake.nix")) {
+            info.files.insert(CanonPath((cwd / ".devenv.flake.nix").string()).removePrefix(CanonPath(path.string())).rel());
+            info.files.insert(CanonPath((cwd / ".devenv/flake.json").string()).removePrefix(CanonPath(path.string())).rel());
+            info.files.insert(CanonPath((cwd / ".devenv/devenv.json").string()).removePrefix(CanonPath(path.string())).rel());
         }
-        if (pathExists(path / "devenv.local.nix")) {
-            info.files.insert(CanonPath("devenv.local.nix"));
+        if (pathExists(cwd / "devenv.local.nix")) {
+            info.files.insert(CanonPath((cwd / "devenv.local.nix").string()).removePrefix(CanonPath(path.string())).rel());
         }
         // begins with .env
-        if (pathExists(path / ".env")) {
-            info.files.insert(CanonPath(".env"));
+        if (pathExists(cwd / ".env")) {
+            info.files.insert(CanonPath((cwd / ".env").string()).removePrefix(CanonPath(path.string())).rel());
         }
 
         return info;
