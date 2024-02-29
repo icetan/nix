@@ -219,7 +219,7 @@ in {
     boost
     brotli
     bzip2
-    curl
+    (curl.override { pslSupport = false; })
     libarchive
     libgit2
     libsodium
