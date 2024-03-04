@@ -315,9 +315,11 @@ struct GitRepoImpl : GitRepo, std::enable_shared_from_this<GitRepoImpl>
         if (pathExists(cwd / "devenv.local.nix")) {
             info.files.insert(CanonPath((cwd / "devenv.local.nix").string()).removePrefix(CanonPath(path.string())).rel());
         }
-        // begins with .env
-        if (pathExists(cwd / ".env")) {
-            info.files.insert(CanonPath((cwd / ".env").string()).removePrefix(CanonPath(path.string())).rel());
+        // find all files that begin with .env
+        for (const auto & entry : fs::directory_iterator(cwd)) {
+            if (entry.path().filename().string().find(".env") == 0) {
+                info.files.insert(CanonPath(entry.path().string()).removePrefix(CanonPath(path.string())).rel());
+            }
         }
 
         return info;
