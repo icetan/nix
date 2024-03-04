@@ -311,6 +311,14 @@ struct GitRepoImpl : GitRepo, std::enable_shared_from_this<GitRepoImpl>
             info.files.insert(CanonPath((cwd / ".devenv.flake.nix").string()).removePrefix(CanonPath(path.string())).rel());
             info.files.insert(CanonPath((cwd / ".devenv/flake.json").string()).removePrefix(CanonPath(path.string())).rel());
             info.files.insert(CanonPath((cwd / ".devenv/devenv.json").string()).removePrefix(CanonPath(path.string())).rel());
+            // support devenv test
+            for (const auto & entry : fs::directory_iterator(cwd)) {
+                if (entry.path().filename().string().find(".devenv.") == 0 && fs::is_directory(entry.path())) {
+                    // add flake.json and devenv.json
+                    info.files.insert(CanonPath((cwd / entry.path() / "flake.json").string()).removePrefix(CanonPath(path.string())).rel());
+                    info.files.insert(CanonPath((cwd / entry.path() / "devenv.json").string()).removePrefix(CanonPath(path.string())).rel());
+                }
+            }
         }
         if (pathExists(cwd / "devenv.local.nix")) {
             info.files.insert(CanonPath((cwd / "devenv.local.nix").string()).removePrefix(CanonPath(path.string())).rel());
@@ -318,7 +326,7 @@ struct GitRepoImpl : GitRepo, std::enable_shared_from_this<GitRepoImpl>
         // find all files that begin with .env
         for (const auto & entry : fs::directory_iterator(cwd)) {
             if (entry.path().filename().string().find(".env") == 0) {
-                info.files.insert(CanonPath(entry.path().string()).removePrefix(CanonPath(path.string())).rel());
+                info.files.insert(CanonPath((cwd / entry.path()).string()).removePrefix(CanonPath(path.string())).rel());
             }
         }
 
